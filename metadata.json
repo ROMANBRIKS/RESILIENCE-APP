@@ -1,0 +1,5 @@
+{
+  "name": "Resilience",
+  "description": "A privacy-first, AI-powered financial support platform for working-class communities.",
+  "requestFramePermissions": ["geolocation"]
+}
