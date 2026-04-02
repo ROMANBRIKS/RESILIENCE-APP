@@ -1,4 +1,4 @@
-import { CommunityPost, FinancialGoal, User, Budget, CommunityStory, NewsArticle } from '../types';
+import { CommunityPost, FinancialGoal, User, Budget, CommunityStory, NewsArticle, FinancialAlert } from '../types';
 
 const STORAGE_KEYS = {
   USER: 'resilience_user',
@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   BUDGET: 'resilience_budget',
   BOTS: 'resilience_bots',
   STORIES: 'resilience_stories',
+  ALERTS: 'resilience_alerts',
 };
 
 export const storage = {
@@ -116,6 +117,28 @@ export const storage = {
   saveVideos: (videos: any[]) => {
     localStorage.setItem('resilience_videos_cache', JSON.stringify({
       videos,
+      timestamp: Date.now()
+    }));
+  },
+  getAlerts: (): { alerts: FinancialAlert[], timestamp: number } | null => {
+    const data = localStorage.getItem(STORAGE_KEYS.ALERTS);
+    return data ? JSON.parse(data) : null;
+  },
+  saveAlerts: (alerts: FinancialAlert[]) => {
+    localStorage.setItem(STORAGE_KEYS.ALERTS, JSON.stringify({
+      alerts,
+      timestamp: Date.now()
+    }));
+  },
+  getIntelligence: (type: 'video' | 'article'): { items: any[], timestamp: number } | null => {
+    const key = type === 'video' ? 'resilience_intelligence_videos' : 'resilience_intelligence_articles';
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  },
+  saveIntelligence: (type: 'video' | 'article', items: any[]) => {
+    const key = type === 'video' ? 'resilience_intelligence_videos' : 'resilience_intelligence_articles';
+    localStorage.setItem(key, JSON.stringify({
+      items,
       timestamp: Date.now()
     }));
   }

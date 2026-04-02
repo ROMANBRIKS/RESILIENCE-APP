@@ -82,28 +82,28 @@ export default function Community({ user }: CommunityProps) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto pb-20">
+    <div className="max-w-2xl mx-auto pb-12 md:pb-20">
       {/* Stories Bar */}
-      <div className="flex gap-4 overflow-x-auto pb-6 mb-8 no-scrollbar">
-        <div className="flex flex-col items-center gap-2 shrink-0">
-          <div className="w-16 h-16 rounded-full p-1 border-2 border-slate-200">
+      <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 md:pb-6 mb-6 md:mb-8 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="flex flex-col items-center gap-1.5 md:gap-2 shrink-0">
+          <div className="w-14 h-14 md:w-16 md:h-16 rounded-full p-0.5 md:p-1 border-2 border-slate-200">
             <div className="w-full h-full rounded-full overflow-hidden relative">
               <img src={user.avatarUrl || `https://picsum.photos/seed/${user.id}/100/100`} alt="Me" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                <Plus className="w-5 h-5 text-white" />
+                <Plus className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
             </div>
           </div>
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Your Story</span>
+          <span className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider">Your Story</span>
         </div>
         {stories.map((story) => (
-          <div key={story.id} className="flex flex-col items-center gap-2 shrink-0">
-            <div className="w-16 h-16 rounded-full p-1 border-2 border-emerald-500">
+          <div key={story.id} className="flex flex-col items-center gap-1.5 md:gap-2 shrink-0">
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full p-0.5 md:p-1 border-2 border-emerald-500">
               <div className="w-full h-full rounded-full overflow-hidden relative">
                 <img src={story.imageUrl} alt={story.userDisplayName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </div>
             </div>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{story.userDisplayName.split(' ')[0]}</span>
+            <span className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-wider">{story.userDisplayName.split(' ')[0]}</span>
           </div>
         ))}
       </div>
@@ -126,15 +126,15 @@ export default function Community({ user }: CommunityProps) {
 
       <div 
         onClick={() => setShowPostModal(true)}
-        className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm mb-8 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors"
+        className="bg-white p-3 md:p-4 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mb-6 md:mb-8 flex items-center gap-3 md:gap-4 cursor-pointer hover:bg-slate-50 transition-colors"
       >
-        <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden">
+        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-100 overflow-hidden">
           <img src={user.avatarUrl || `https://picsum.photos/seed/${user.id}/100/100`} alt="Me" referrerPolicy="no-referrer" />
         </div>
-        <div className="flex-1 bg-slate-50 rounded-full px-6 py-2 text-slate-400 text-sm font-medium">
+        <div className="flex-1 bg-slate-50 rounded-full px-4 md:px-6 py-2 text-slate-400 text-xs md:text-sm font-medium">
           Share a struggle or a win...
         </div>
-        <Camera className="w-6 h-6 text-slate-400" />
+        <Camera className="w-5 h-5 md:w-6 md:h-6 text-slate-400" />
       </div>
 
       {/* Feed */}
@@ -262,24 +262,24 @@ export default function Community({ user }: CommunityProps) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative max-w-lg w-full bg-white rounded-[3rem] p-8 shadow-2xl"
+              className="relative max-w-lg w-full bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-8 shadow-2xl"
             >
-              <h3 className="text-2xl font-black uppercase italic tracking-tighter mb-6">Create Post</h3>
-              <form onSubmit={handlePost} className="space-y-6">
+              <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter mb-4 md:mb-6">Create Post</h3>
+              <form onSubmit={handlePost} className="space-y-4 md:space-y-6">
                 <textarea
                   value={content}
                   onChange={e => setContent(e.target.value)}
                   placeholder={activeTag ? `Add ${activeTag} to your post...` : "What's on your mind?"}
-                  className="w-full p-6 bg-slate-50 rounded-3xl border-none focus:ring-2 focus:ring-slate-900 outline-none resize-none h-48 text-lg"
+                  className="w-full p-4 md:p-6 bg-slate-50 rounded-2xl md:rounded-3xl border-none focus:ring-2 focus:ring-slate-900 outline-none resize-none h-32 md:h-48 text-base md:text-lg"
                   autoFocus
                 />
                 <div className="flex items-center justify-between">
-                  <button type="button" className="p-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 transition-colors">
-                    <Camera className="w-6 h-6" />
+                  <button type="button" className="p-3 md:p-4 bg-slate-100 text-slate-600 rounded-xl md:rounded-2xl hover:bg-slate-200 transition-colors">
+                    <Camera className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
                   <button
                     type="submit"
-                    className="px-8 py-4 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-2xl hover:bg-slate-800 transition-all"
+                    className="px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-xl md:rounded-2xl hover:bg-slate-800 transition-all text-sm md:text-base"
                   >
                     Post Story
                   </button>

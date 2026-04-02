@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { CommunityPost, User, CommunityStory, CommunityComment } from "../types";
 import { storage } from "./storage";
 
@@ -22,8 +22,25 @@ export const botService = {
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        config: { 
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                displayName: { type: Type.STRING },
+                email: { type: Type.STRING },
+                region: { type: Type.STRING },
+                bio: { type: Type.STRING },
+                avatarUrl: { type: Type.STRING }
+              },
+              required: ["id", "displayName", "email", "region", "bio"]
+            }
+          }
+        }
       });
 
       const bots: User[] = JSON.parse(response.text).map((b: any, i: number) => ({
@@ -82,8 +99,35 @@ export const botService = {
 
         const response = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
-          contents: prompt,
-          config: { responseMimeType: "application/json" }
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: { 
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  userDisplayName: { type: Type.STRING },
+                  content: { type: Type.STRING },
+                  hoursAgo: { type: Type.NUMBER },
+                  likes: { type: Type.NUMBER },
+                  comments: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        userDisplayName: { type: Type.STRING },
+                        content: { type: Type.STRING },
+                        hoursAgo: { type: Type.NUMBER }
+                      },
+                      required: ["userDisplayName", "content", "hoursAgo"]
+                    }
+                  }
+                },
+                required: ["userDisplayName", "content", "hoursAgo", "likes"]
+              }
+            }
+          }
         });
 
         const rawPosts = JSON.parse(response.text);
@@ -179,8 +223,18 @@ export const botService = {
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        config: { 
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              content: { type: Type.STRING },
+              likes: { type: Type.NUMBER }
+            },
+            required: ["content", "likes"]
+          }
+        }
       });
 
       const data = JSON.parse(response.text);

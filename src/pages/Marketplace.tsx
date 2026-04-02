@@ -2,42 +2,42 @@ import { ShoppingBag, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function Marketplace() {
   return (
-    <div className="space-y-16 py-12">
-      <div className="max-w-3xl mx-auto text-center space-y-8">
-        <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-slate-900 text-emerald-400 mb-4 shadow-2xl shadow-emerald-400/20">
-          <ShoppingBag className="w-12 h-12" />
+    <div className="space-y-12 md:space-y-16 py-6 md:py-12">
+      <div className="max-w-3xl mx-auto text-center space-y-6 md:space-y-8 px-4">
+        <div className="inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-[1.5rem] md:rounded-[2rem] bg-slate-900 text-emerald-400 mb-2 md:mb-4 shadow-2xl shadow-emerald-400/20">
+          <ShoppingBag className="w-10 h-10 md:w-12 md:h-12" />
         </div>
-        <h2 className="text-6xl font-black uppercase italic tracking-tighter text-slate-900">Marketplace</h2>
-        <div className="inline-block px-6 py-2 bg-emerald-400 text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-full shadow-lg">
+        <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">Marketplace</h2>
+        <div className="inline-block px-4 py-1.5 md:px-6 md:py-2 bg-emerald-400 text-black text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full shadow-lg">
           Coming Soon
         </div>
-        <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
+        <p className="text-base md:text-xl text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
           A decentralized, escrow-based marketplace for community trading and skill exchange.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 px-4 md:px-0">
         {[
           { icon: ShieldCheck, title: 'Escrow Payments', desc: 'Funds are held securely until the buyer confirms delivery. No more scams.', color: 'text-blue-600', bg: 'bg-blue-50' },
           { icon: Clock, title: 'Fair Pricing AI', desc: 'Our AI evaluates item value and suggests optimal pricing based on market data.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { icon: AlertCircle, title: 'Trust System', desc: 'Community-driven feedback and moderation ensures a safe environment.', color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map((feature, i) => (
-          <div key={i} className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 group">
-            <div className={`w-16 h-16 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-sm`}>
-              <feature.icon className="w-8 h-8" />
+          <div key={i} className="p-8 md:p-10 bg-white rounded-[2rem] md:rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 group">
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center mb-6 md:mb-8 group-hover:scale-110 transition-transform shadow-sm`}>
+              <feature.icon className="w-6 h-6 md:w-8 md:h-8" />
             </div>
-            <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900 mb-4">{feature.title}</h3>
-            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-wider leading-relaxed">
+            <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-slate-900 mb-3 md:mb-4">{feature.title}</h3>
+            <p className="text-slate-400 text-[10px] md:text-[11px] font-bold uppercase tracking-wider leading-relaxed">
               {feature.desc}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="p-16 bg-slate-50 rounded-[4rem] text-center border-2 border-dashed border-slate-200 shadow-inner">
-        <h4 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 mb-4">Want to be a beta tester?</h4>
-        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-10">We'll notify you when the marketplace goes live in your region.</p>
-        <button className="px-12 py-6 bg-slate-900 text-white font-black uppercase italic tracking-tighter text-sm rounded-2xl hover:bg-slate-800 transition-all shadow-2xl shadow-slate-900/20">
+      <div className="p-8 md:p-16 bg-slate-50 rounded-[2.5rem] md:rounded-[4rem] text-center border-2 border-dashed border-slate-200 shadow-inner mx-4 md:mx-0">
+        <h4 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-slate-900 mb-3 md:mb-4">Want to be a beta tester?</h4>
+        <p className="text-slate-400 text-[10px] md:text-sm font-bold uppercase tracking-widest mb-8 md:mb-10">We'll notify you when the marketplace goes live in your region.</p>
+        <button className="w-full md:w-auto px-10 py-5 md:px-12 md:py-6 bg-slate-900 text-white font-black uppercase italic tracking-tighter text-xs md:text-sm rounded-xl md:rounded-2xl hover:bg-slate-800 transition-all shadow-2xl shadow-slate-900/20">
           Join the Waitlist
         </button>
       </div>

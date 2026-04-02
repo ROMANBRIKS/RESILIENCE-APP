@@ -50,7 +50,7 @@ export default function News() {
 
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: prompt + `
+        contents: [{ role: "user", parts: [{ text: prompt + `
           Return a JSON array of objects. 
           CRITICAL: The "url" MUST be a direct YouTube watch link.
           
@@ -61,7 +61,7 @@ export default function News() {
           - snippet: string (2-sentence summary)
           - thumbnail: string (YouTube thumbnail URL)
           - date: string (ISO date string if available)
-        `,
+        ` }] }],
         config: {
           tools: [{ googleSearch: {} }],
           responseMimeType: "application/json",
@@ -121,26 +121,26 @@ export default function News() {
   return (
     <div className="space-y-12 pb-20">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-4 md:px-0">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Newspaper className="w-6 h-6 text-black" />
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Newspaper className="w-5 h-5 md:w-6 md:h-6 text-black" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Video Intelligence</span>
+            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Video Intelligence</span>
           </div>
-          <h1 className="text-6xl font-black text-slate-900 tracking-tighter uppercase italic leading-[0.85]">
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase italic leading-[0.85]">
             Financial <br />
             <span className="text-emerald-500">Pulse</span>
           </h1>
-          <p className="text-slate-500 mt-4 max-w-md font-medium">
+          <p className="text-slate-500 mt-4 max-w-md font-medium text-sm md:text-base">
             The latest trending financial news videos, curated to help you navigate the current economic landscape.
           </p>
         </div>
         <button 
           onClick={() => fetchNews(false)}
           disabled={loading}
-          className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-black uppercase italic tracking-tighter hover:bg-slate-50 transition-all disabled:opacity-50 group"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-black uppercase italic tracking-tighter hover:bg-slate-50 transition-all disabled:opacity-50 group w-full md:w-auto"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
           Refresh Feed
@@ -161,14 +161,14 @@ export default function News() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-slate-900 w-full max-w-6xl rounded-[3rem] overflow-hidden shadow-2xl relative"
+              className="bg-slate-900 w-full max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl relative"
               onClick={e => e.stopPropagation()}
             >
               <button 
                 onClick={() => setSelectedVideo(null)}
-                className="absolute top-6 right-6 z-10 p-3 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all"
+                className="absolute top-4 right-4 md:top-6 md:right-6 z-10 p-2 md:p-3 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 md:w-6 md:h-6" />
               </button>
               <div className="aspect-video w-full bg-black relative">
                 <iframe
@@ -183,28 +183,28 @@ export default function News() {
                   <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin" />
                 </div>
               </div>
-              <div className="p-10">
+              <div className="p-6 md:p-10">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-emerald-400" />
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{selectedVideo.source}</span>
+                  <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-emerald-400">{selectedVideo.source}</span>
                 </div>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
-                  <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-tight group-hover:text-emerald-400 transition-colors">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-4">
+                  <h2 className="text-xl md:text-3xl font-black text-white tracking-tighter uppercase italic leading-tight group-hover:text-emerald-400 transition-colors">
                     {selectedVideo.title}
                   </h2>
                   <a 
                     href={selectedVideo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-2xl text-sm font-black uppercase italic tracking-tighter hover:bg-emerald-500 hover:text-white transition-all shrink-0"
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl md:rounded-2xl text-xs md:text-sm font-black uppercase italic tracking-tighter hover:bg-emerald-500 hover:text-white transition-all shrink-0"
                   >
                     <ExternalLink className="w-4 h-4" />
                     Open in YouTube
                   </a>
                 </div>
-                <p className="text-slate-400 text-base font-medium leading-relaxed max-w-3xl">{selectedVideo.snippet}</p>
+                <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-3xl">{selectedVideo.snippet}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -212,12 +212,12 @@ export default function News() {
       </AnimatePresence>
 
       {/* News Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-0">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-[3rem] overflow-hidden border border-slate-100 animate-pulse">
+            <div key={i} className="bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 animate-pulse">
               <div className="aspect-video bg-slate-100" />
-              <div className="p-8">
+              <div className="p-6 md:p-8">
                 <div className="w-24 h-3 bg-slate-100 rounded-full mb-4" />
                 <div className="w-full h-6 bg-slate-100 rounded-lg mb-2" />
                 <div className="w-2/3 h-6 bg-slate-100 rounded-lg" />
@@ -225,8 +225,8 @@ export default function News() {
             </div>
           ))
         ) : error ? (
-          <div className="col-span-full py-20 text-center bg-rose-50 rounded-[3rem] border border-rose-100">
-            <p className="text-rose-500 font-black uppercase italic tracking-tighter text-xl">{error}</p>
+          <div className="col-span-full py-12 md:py-20 text-center bg-rose-50 rounded-[2rem] md:rounded-[3rem] border border-rose-100 px-6">
+            <p className="text-rose-500 font-black uppercase italic tracking-tighter text-lg md:text-xl">{error}</p>
             <button onClick={() => fetchNews(false)} className="mt-4 text-rose-600 underline font-bold">Try again</button>
           </div>
         ) : (
@@ -237,7 +237,7 @@ export default function News() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="group bg-white rounded-[3rem] overflow-hidden border border-slate-100 hover:border-emerald-200 hover:shadow-2xl hover:shadow-emerald-500/5 transition-all flex flex-col h-full"
+                className="group bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 hover:border-emerald-200 hover:shadow-2xl hover:shadow-emerald-500/5 transition-all flex flex-col h-full"
               >
                 <div 
                   className="relative aspect-video overflow-hidden cursor-pointer"
@@ -253,36 +253,36 @@ export default function News() {
                     }}
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform">
-                      <Play className="w-6 h-6 text-emerald-600 fill-emerald-600 ml-1" />
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 md:w-6 md:h-6 text-emerald-600 fill-emerald-600 ml-1" />
                     </div>
                   </div>
                   {article.date && (
-                    <div className="absolute bottom-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 px-2 md:px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[9px] md:text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
                       <Clock className="w-3 h-3" />
                       {formatDistanceToNow(new Date(article.date), { addSuffix: true })}
                     </div>
                   )}
                 </div>
 
-                <div className="p-8 flex-1 flex flex-col">
-                  <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-4 h-4 text-emerald-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{article.source}</span>
+                <div className="p-6 md:p-8 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 mb-3 md:mb-4">
+                    <TrendingUp className="w-3 h-3 md:w-4 md:h-4 text-emerald-500" />
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">{article.source}</span>
                   </div>
 
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight mb-4 group-hover:text-emerald-600 transition-colors">
+                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight mb-3 md:mb-4 group-hover:text-emerald-600 transition-colors">
                     {article.title}
                   </h2>
 
-                  <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-2">
+                  <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-6 md:mb-8 line-clamp-2">
                     {article.snippet}
                   </p>
 
                   <div className="mt-auto flex gap-3">
                     <button 
                       onClick={() => setSelectedVideo(article)}
-                      className="flex-1 flex items-center justify-center gap-2 py-4 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-2xl hover:bg-emerald-600 transition-all"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 md:py-4 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-xl md:rounded-2xl hover:bg-emerald-600 transition-all text-sm"
                     >
                       Watch News
                     </button>
@@ -290,9 +290,9 @@ export default function News() {
                       href={article.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100 hover:text-slate-900 transition-all"
+                      className="p-3 md:p-4 bg-slate-50 text-slate-400 rounded-xl md:rounded-2xl hover:bg-slate-100 hover:text-slate-900 transition-all"
                     >
-                      <ExternalLink className="w-5 h-5" />
+                      <ExternalLink className="w-4 h-4 md:w-5 md:h-5" />
                     </a>
                   </div>
                 </div>
@@ -304,21 +304,21 @@ export default function News() {
 
       {/* Load More */}
       {!loading && !error && news.length > 0 && (
-        <div className="flex justify-center pt-8">
+        <div className="flex justify-center pt-8 px-4">
           <button
             onClick={() => fetchNews(true)}
             disabled={loadingMore}
-            className="flex items-center gap-3 px-12 py-5 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-[2rem] hover:bg-slate-800 transition-all disabled:opacity-50 shadow-xl shadow-slate-900/20"
+            className="w-full md:w-auto flex items-center justify-center gap-3 px-8 md:px-12 py-4 md:py-5 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-xl md:rounded-[2rem] hover:bg-slate-800 transition-all disabled:opacity-50 shadow-xl shadow-slate-900/20 text-sm md:text-base"
           >
             {loadingMore ? (
               <>
                 <RefreshCw className="w-5 h-5 animate-spin" />
-                Searching for more...
+                Searching...
               </>
             ) : (
               <>
                 <TrendingUp className="w-5 h-5" />
-                Load More Trending News
+                Load More News
               </>
             )}
           </button>

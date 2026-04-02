@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   phone: string;
-  region: 'US' | 'EU' | 'OTHER';
+  region: 'US' | 'EU' | 'CA' | 'AU' | 'FI' | 'CH' | 'OTHER';
   optInConnection: boolean;
   displayName?: string;
   avatarUrl?: string;
@@ -83,4 +83,30 @@ export interface NewsArticle {
   snippet: string;
   thumbnail?: string;
   date?: string;
+  platform?: 'youtube' | 'rumble' | 'article' | 'other';
+}
+
+export interface IntelligenceItem {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+  snippet: string;
+  thumbnail?: string;
+  date?: string;
+  platform: 'youtube' | 'rumble' | 'article' | 'other';
+  type: 'video' | 'article';
+  channel?: string;
+  personalizedSummary?: string;
+}
+
+export interface FinancialAlert {
+  id: string;
+  type: 'crisis' | 'inflation' | 'cycle' | 'opportunity';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionUrl: string;
+  createdAt: number;
 }

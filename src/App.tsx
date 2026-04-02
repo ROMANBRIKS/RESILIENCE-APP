@@ -11,8 +11,7 @@ import Comparison from './pages/Comparison';
 import Community from './pages/Community';
 import Counseling from './pages/Counseling';
 import Marketplace from './pages/Marketplace';
-import News from './pages/News';
-import GlobalEconomy from './pages/GlobalEconomy';
+import Intelligence from './pages/Intelligence';
 import BudgetCalculator from './pages/BudgetCalculator';
 import Layout from './components/Layout';
 
@@ -67,8 +66,9 @@ export default function App() {
           <Route path="/community" element={<Community user={user!} />} />
           <Route path="/counseling" element={<Counseling />} />
           <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/global-economy" element={<GlobalEconomy />} />
+          <Route path="/intelligence" element={<Intelligence />} />
+          <Route path="/news" element={<Intelligence />} />
+          <Route path="/global-economy" element={<Intelligence />} />
         </Route>
       </Routes>
     </Router>

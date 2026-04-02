@@ -1,9 +1,10 @@
-import { User, FinancialGoal, NewsArticle } from '../types';
+import { User, FinancialGoal, NewsArticle, FinancialAlert } from '../types';
 import { storage } from '../services/storage';
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Wallet, Target, ArrowRight, Plus, Users, Calculator, Play, Globe } from 'lucide-react';
-import { motion } from 'motion/react';
+import { TrendingUp, Wallet, Target, ArrowRight, Plus, Users, Calculator, Play, Globe, AlertTriangle, AlertCircle, Info, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { crisisService } from '../services/crisisService';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +18,7 @@ export default function Dashboard({ user }: DashboardProps) {
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [newGoal, setNewGoal] = useState({ title: '', target: '' });
   const [latestVideos, setLatestVideos] = useState<NewsArticle[]>([]);
+  const [alerts, setAlerts] = useState<FinancialAlert[]>([]);
 
   useEffect(() => {
     setGoals(storage.getGoals());
@@ -24,7 +26,14 @@ export default function Dashboard({ user }: DashboardProps) {
     if (cachedNews) {
       setLatestVideos(cachedNews.articles.slice(0, 2));
     }
-  }, []);
+
+    const cachedAlerts = crisisService.getCachedAlerts(user.region);
+    if (cachedAlerts.length > 0) {
+      setAlerts(cachedAlerts);
+    } else {
+      crisisService.generateAlerts(user.region).then(setAlerts);
+    }
+  }, [user.region]);
 
   const handleAddGoal = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,36 +52,103 @@ export default function Dashboard({ user }: DashboardProps) {
 
   return (
     <div className="space-y-12">
-      <header>
-        <h2 className="text-4xl font-black uppercase italic tracking-tighter text-slate-900">Welcome back</h2>
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-1">Your financial overview for {user.region}</p>
+      <header className="px-2 md:px-0">
+        <h2 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">Welcome back</h2>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">Your financial overview for {user.region}</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all">
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 shadow-sm">
-            <Wallet className="w-7 h-7" />
+      {/* Financial Alerts Section */}
+      <AnimatePresence>
+        {alerts.length > 0 && (
+          <motion.section 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-4"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="w-5 h-5 text-rose-500" />
+              <h3 className="text-lg font-black uppercase italic tracking-tighter text-slate-900">Critical Alerts</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {alerts.map((alert) => (
+                <div 
+                  key={alert.id}
+                  className={`relative overflow-hidden p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border-2 transition-all hover:shadow-2xl ${
+                    alert.severity === 'critical' || alert.severity === 'high' 
+                      ? 'bg-rose-50 border-rose-500 text-rose-900' 
+                      : 'bg-amber-50 border-amber-500 text-amber-900'
+                  }`}
+                >
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`p-3 rounded-2xl ${
+                        alert.severity === 'critical' || alert.severity === 'high' 
+                          ? 'bg-rose-500 text-white' 
+                          : 'bg-amber-500 text-white'
+                      }`}>
+                        {alert.type === 'crisis' ? <AlertCircle className="w-6 h-6" /> : <Info className="w-6 h-6" />}
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
+                        {alert.severity} Priority
+                      </span>
+                    </div>
+                    <h4 className="text-2xl font-black uppercase italic tracking-tighter mb-2 leading-tight">
+                      {alert.title}
+                    </h4>
+                    <p className="text-sm font-bold opacity-80 mb-6 leading-relaxed">
+                      {alert.description}
+                    </p>
+                    <a 
+                      href={alert.actionUrl}
+                      target={alert.actionUrl.startsWith('http') ? '_blank' : '_self'}
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase italic tracking-tighter transition-all ${
+                        alert.severity === 'critical' || alert.severity === 'high'
+                          ? 'bg-rose-500 text-white hover:bg-rose-600'
+                          : 'bg-amber-500 text-white hover:bg-amber-600'
+                      }`}
+                    >
+                      {alert.actionLabel} <ChevronRight className="w-4 h-4" />
+                    </a>
+                  </div>
+                  <div className={`absolute -right-8 -bottom-8 w-48 h-48 opacity-10 ${
+                    alert.severity === 'critical' || alert.severity === 'high' ? 'text-rose-900' : 'text-amber-900'
+                  }`}>
+                    {alert.type === 'crisis' ? <AlertTriangle className="w-full h-full" /> : <Globe className="w-full h-full" />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+        <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all">
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 md:mb-6 shadow-sm">
+            <Wallet className="w-6 h-6 md:w-7 md:h-7" />
           </div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estimated Savings</p>
-          <h3 className="text-3xl font-black text-slate-900 mt-2">$1,240.00</h3>
+          <h3 className="text-2xl md:text-3xl font-black text-slate-900 mt-2">$1,240.00</h3>
           <p className="text-xs text-emerald-600 font-black mt-3 flex items-center gap-1 uppercase italic tracking-tighter">
             <TrendingUp className="w-4 h-4" /> +12% this month
           </p>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all">
-          <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6 shadow-sm">
-            <Target className="w-7 h-7" />
+        <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all">
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 md:mb-6 shadow-sm">
+            <Target className="w-6 h-6 md:w-7 md:h-7" />
           </div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Goals</p>
-          <h3 className="text-3xl font-black text-slate-900 mt-2">{goals.length}</h3>
+          <h3 className="text-2xl md:text-3xl font-black text-slate-900 mt-2">{goals.length}</h3>
           <p className="text-xs text-slate-400 font-bold mt-3 uppercase tracking-widest">Tracking progress</p>
         </div>
 
-        <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl shadow-slate-900/20 text-white relative overflow-hidden group">
+        <div className="bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-slate-900/20 text-white relative overflow-hidden group">
           <div className="relative z-10">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AI Insight</p>
-            <p className="text-xl font-black uppercase italic tracking-tighter mt-4 leading-tight">
+            <p className="text-lg md:text-xl font-black uppercase italic tracking-tighter mt-4 leading-tight">
               "You could save <span className="text-emerald-400">$45</span> by switching your grocery store this week."
             </p>
             <div className="flex flex-col gap-2 mt-6">
