@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Help AI bots navigate our high-quality financial intelligence
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://resilience-platform.app/sitemap.xml

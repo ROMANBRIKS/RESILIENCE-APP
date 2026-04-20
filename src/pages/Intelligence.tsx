@@ -20,6 +20,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { storage } from '../services/storage';
 import { IntelligenceItem } from '../types';
 import { cn } from '../lib/utils';
+import { VideoPlayer } from '../components/VideoPlayer';
 
 type Tab = 'article' | 'video';
 type Platform = 'all' | 'youtube' | 'rumble';
@@ -33,39 +34,6 @@ export default function Intelligence() {
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<IntelligenceItem | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [iframeLoading, setIframeLoading] = useState(true);
-  const [playerKey, setPlayerKey] = useState(0);
-
-  const getVideoId = (url: string, platform: string) => {
-    if (!url) return null;
-    if (platform === 'youtube') {
-      const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    } else if (platform === 'rumble') {
-      // Enhanced Rumble ID extraction
-      // Captures the alphanumeric ID following /v/ or /embed/ or just /v
-      // Example: https://rumble.com/v50...-title.html -> v50...
-      const match = url.match(/rumble\.com\/(?:embed\/|v\/|v)?([a-z0-9]+)/i);
-      return match ? match[1] : null;
-    }
-    return null;
-  };
-
-  const getEmbedUrl = (item: IntelligenceItem) => {
-    const id = getVideoId(item.url, item.platform);
-    if (!id) return null;
-    if (item.platform === 'youtube') return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
-    if (item.platform === 'rumble') return `https://rumble.com/embed/${id}/?autoplay=1`;
-    return null;
-  };
-
-  // Reset iframe loading when selected item or playerKey changes
-  useEffect(() => {
-    if (selectedItem) {
-      setIframeLoading(true);
-    }
-  }, [selectedItem, playerKey]);
 
   const fetchIntelligence = async (query?: string) => {
     setLoading(true);
@@ -182,6 +150,9 @@ export default function Intelligence() {
     return item.platform === platformFilter;
   });
 
+  const featuredItem = activeTab === 'video' && !searchQuery && filteredItems.length > 0 ? filteredItems[0] : null;
+  const displayItems = featuredItem ? filteredItems.slice(1) : filteredItems;
+
   return (
     <div className="space-y-8 pb-24 md:pb-12">
       {/* Header Section */}
@@ -263,238 +234,199 @@ export default function Intelligence() {
       )}
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 md:px-0">
+      <div className="px-4 md:px-0 space-y-8">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 animate-pulse h-96" />
-          ))
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 animate-pulse h-96" />
+            ))}
+          </div>
         ) : error ? (
-          <div className="col-span-full py-12 md:py-20 text-center bg-rose-50 rounded-[2rem] md:rounded-[3rem] border border-rose-100 px-6">
+          <div className="py-12 md:py-20 text-center bg-rose-50 rounded-[2rem] md:rounded-[3rem] border border-rose-100 px-6">
             <p className="text-rose-500 font-black uppercase italic tracking-tighter text-lg md:text-xl">{error}</p>
             <button onClick={() => fetchIntelligence()} className="mt-4 text-rose-600 underline font-bold">Try again</button>
           </div>
         ) : (
-          filteredItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="group bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all flex flex-col"
-            >
-              <div 
-                className="relative aspect-video overflow-hidden cursor-pointer"
-                onClick={() => item.type === 'video' ? setSelectedItem(item) : window.open(item.url, '_blank')}
+          <>
+            {/* Featured Hero Section */}
+            {featuredItem && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative group bg-slate-900 rounded-[2.5rem] md:rounded-[4rem] overflow-hidden border border-slate-800 shadow-2xl shadow-indigo-500/10"
               >
-                <img 
-                  src={item.thumbnail || `https://picsum.photos/seed/${item.id}/800/450`} 
-                  alt={item.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  referrerPolicy="no-referrer"
-                />
-                {item.type === 'video' ? (
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform">
-                      <Play className="w-5 h-5 md:w-6 md:h-6 text-indigo-600 fill-indigo-600 ml-1" />
+                <div className="flex flex-col lg:flex-row">
+                  <div 
+                    className="lg:w-3/5 aspect-video relative cursor-pointer overflow-hidden"
+                    onClick={() => setSelectedItem(featuredItem)}
+                  >
+                    <img 
+                      src={featuredItem.thumbnail || `https://picsum.photos/seed/${featuredItem.id}/1280/720`} 
+                      alt={featuredItem.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-20 h-20 md:w-24 md:h-24 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/20 transform group-hover:scale-110 transition-transform">
+                        <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-white ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute top-6 left-6 flex gap-3">
+                      <span className="px-4 py-2 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">Featured Report</span>
+                      <span className={cn(
+                        "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-md flex items-center gap-2",
+                        featuredItem.platform === 'youtube' ? "bg-red-600/80" : "bg-emerald-600/80"
+                      )}>
+                        {featuredItem.platform === 'youtube' ? <Youtube className="w-3 h-3" /> : <Video className="w-3 h-3" />}
+                        {featuredItem.platform}
+                      </span>
                     </div>
                   </div>
-                ) : (
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="px-6 py-3 bg-white rounded-full flex items-center gap-2 shadow-xl">
-                      <BookOpen className="w-4 h-4 text-indigo-600" />
-                      <span className="text-xs font-black uppercase italic tracking-tighter">Read Article</span>
+                  <div className="lg:w-2/5 p-8 md:p-12 flex flex-col justify-center">
+                    <div className="flex items-center gap-3 mb-6">
+                      <Globe className="w-4 h-4 text-indigo-400" />
+                      <span className="text-xs font-black uppercase tracking-widest text-slate-400">{featuredItem.source}</span>
                     </div>
-                  </div>
-                )}
-                
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <span className={cn(
-                    "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-md flex items-center gap-1.5",
-                    item.platform === 'youtube' ? "bg-red-600/90" : 
-                    item.platform === 'rumble' ? "bg-emerald-600/90" : "bg-indigo-600/90"
-                  )}>
-                    {item.platform === 'youtube' && <Youtube className="w-3 h-3" />}
-                    {item.platform === 'rumble' && <Video className="w-3 h-3" />}
-                    {item.platform}
-                  </span>
-                  {item.date && (new Date().getTime() - new Date(item.date).getTime() < 24 * 60 * 60 * 1000) && (
-                    <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-rose-600/90 backdrop-blur-md animate-pulse">
-                      Live / New
-                    </span>
-                  )}
-                </div>
-
-                {item.date && (
-                  <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 px-2 md:px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[9px] md:text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
-                    <Clock className="w-3 h-3" />
-                    {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6 md:p-8 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                  <Globe className="w-3 h-3 md:w-4 md:h-4 text-indigo-500" />
-                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {item.source}
-                  </span>
-                </div>
-
-                <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight mb-3 md:mb-4 group-hover:text-indigo-600 transition-colors">
-                  {item.title}
-                </h2>
-
-                <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-6 md:mb-8 line-clamp-2">
-                  {item.snippet}
-                </p>
-
-                {item.type === 'article' && item.personalizedSummary && (
-                  <div className="mb-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="w-3 h-3 text-indigo-600" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">How it affects you ({user?.region || 'Global'})</span>
-                    </div>
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed italic">
-                      "{item.personalizedSummary}"
+                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-[0.9] mb-6">
+                      {featuredItem.title}
+                    </h2>
+                    <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed mb-8 line-clamp-3">
+                      {featuredItem.snippet}
                     </p>
+                    <button 
+                      onClick={() => setSelectedItem(featuredItem)}
+                      className="w-full md:w-auto px-10 py-5 bg-white text-slate-900 rounded-2xl font-black uppercase italic tracking-tighter hover:bg-indigo-500 hover:text-white transition-all flex items-center justify-center gap-3"
+                    >
+                      Watch Full Intelligence Briefing
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
                   </div>
-                )}
-
-                <div className="mt-auto flex gap-3">
-                  <button 
-                    onClick={() => item.type === 'video' ? setSelectedItem(item) : window.open(item.url, '_blank')}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 md:py-4 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-xl md:rounded-2xl hover:bg-indigo-600 transition-all text-sm"
-                  >
-                    {item.type === 'video' ? 'Watch Report' : 'Read Full Story'}
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <a 
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 md:p-4 bg-slate-50 text-slate-400 rounded-xl md:rounded-2xl hover:bg-slate-100 hover:text-slate-900 transition-all"
-                  >
-                    <ExternalLink className="w-4 h-4 md:w-5 md:h-5" />
-                  </a>
                 </div>
-              </div>
-            </motion.div>
-          ))
+              </motion.div>
+            )}
+
+            {/* Grid Items */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              {displayItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all flex flex-col"
+                >
+                  <div 
+                    className="relative aspect-video overflow-hidden cursor-pointer"
+                    onClick={() => item.type === 'video' ? setSelectedItem(item) : window.open(item.url, '_blank')}
+                  >
+                    <img 
+                      src={item.thumbnail || `https://picsum.photos/seed/${item.id}/800/450`} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                    {item.type === 'video' ? (
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-transform">
+                          <Play className="w-5 h-5 md:w-6 md:h-6 text-indigo-600 fill-indigo-600 ml-1" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div className="px-6 py-3 bg-white rounded-full flex items-center gap-2 shadow-xl">
+                          <BookOpen className="w-4 h-4 text-indigo-600" />
+                          <span className="text-xs font-black uppercase italic tracking-tighter">Read Article</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      <span className={cn(
+                        "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-md flex items-center gap-1.5",
+                        item.platform === 'youtube' ? "bg-red-600/90" : 
+                        item.platform === 'rumble' ? "bg-emerald-600/90" : "bg-indigo-600/90"
+                      )}>
+                        {item.platform === 'youtube' && <Youtube className="w-3 h-3" />}
+                        {item.platform === 'rumble' && <Video className="w-3 h-3" />}
+                        {item.platform}
+                      </span>
+                      {item.date && (new Date().getTime() - new Date(item.date).getTime() < 24 * 60 * 60 * 1000) && (
+                        <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest text-white bg-rose-600/90 backdrop-blur-md animate-pulse">
+                          Live / New
+                        </span>
+                      )}
+                    </div>
+
+                    {item.date && (
+                      <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 px-2 md:px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[9px] md:text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                        <Clock className="w-3 h-3" />
+                        {formatDistanceToNow(new Date(item.date), { addSuffix: true })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-6 md:p-8 flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 mb-3 md:mb-4">
+                      <Globe className="w-3 h-3 md:w-4 md:h-4 text-indigo-500" />
+                      <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        {item.source}
+                      </span>
+                    </div>
+
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight mb-3 md:mb-4 group-hover:text-indigo-600 transition-colors">
+                      {item.title}
+                    </h2>
+
+                    <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-6 md:mb-8 line-clamp-2">
+                      {item.snippet}
+                    </p>
+
+                    {item.type === 'article' && item.personalizedSummary && (
+                      <div className="mb-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="w-3 h-3 text-indigo-600" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">How it affects you ({user?.region || 'Global'})</span>
+                        </div>
+                        <p className="text-xs text-slate-600 font-medium leading-relaxed italic">
+                          "{item.personalizedSummary}"
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-auto flex gap-3">
+                      <button 
+                        onClick={() => item.type === 'video' ? setSelectedItem(item) : window.open(item.url, '_blank')}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 md:py-4 bg-slate-900 text-white font-black uppercase italic tracking-tighter rounded-xl md:rounded-2xl hover:bg-indigo-600 transition-all text-sm"
+                      >
+                        {item.type === 'video' ? 'Watch Report' : 'Read Full Story'}
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                      <a 
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 md:p-4 bg-slate-50 text-slate-400 rounded-xl md:rounded-2xl hover:bg-slate-100 hover:text-slate-900 transition-all"
+                      >
+                        <ExternalLink className="w-4 h-4 md:w-5 md:h-5" />
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
-      <AnimatePresence>
-        {selectedItem && selectedItem.type === 'video' && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
-            onClick={() => setSelectedItem(null)}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-slate-900 w-full max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl relative"
-              onClick={e => e.stopPropagation()}
-            >
-              <button 
-                onClick={() => setSelectedItem(null)}
-                className="absolute top-4 right-4 md:top-6 md:right-6 z-30 p-2 md:p-3 bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-md transition-all"
-              >
-                <X className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-              
-              <div className="aspect-video w-full bg-black relative">
-                {getEmbedUrl(selectedItem) ? (
-                  <>
-                    <iframe
-                      key={playerKey}
-                      src={getEmbedUrl(selectedItem)}
-                      title={selectedItem.title}
-                      className="w-full h-full relative z-10"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                      allowFullScreen
-                      onLoad={() => setIframeLoading(false)}
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
-                    {iframeLoading && (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-20">
-                        <RefreshCw className="w-10 h-10 text-indigo-500 animate-spin mb-4" />
-                        <p className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Establishing Secure Connection...</p>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 p-8 text-center">
-                    <Video className="w-16 h-16 text-slate-700 mb-6" />
-                    <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">Playback Restriction</h3>
-                    <p className="text-slate-400 text-sm md:text-base mb-8 max-w-md">
-                      This specific video platform has restricted direct playback within third-party apps. 
-                      You can still watch the full report directly on their platform.
-                    </p>
-                    <a 
-                      href={selectedItem.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase italic tracking-tighter hover:bg-indigo-500 transition-all flex items-center gap-3"
-                    >
-                      Watch on {selectedItem.platform}
-                      <ExternalLink className="w-5 h-5" />
-                    </a>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6 md:p-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />
-                  </div>
-                  <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-indigo-400">
-                    {selectedItem.source}
-                  </span>
-                </div>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-4">
-                  <h2 className="text-xl md:text-3xl font-black text-white tracking-tighter uppercase italic leading-tight">
-                    {selectedItem.title}
-                  </h2>
-                  <div className="flex gap-3 shrink-0">
-                    <button 
-                      onClick={() => setPlayerKey(prev => prev + 1)}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-xl md:rounded-2xl text-xs md:text-sm font-black uppercase italic tracking-tighter hover:bg-slate-700 transition-all"
-                    >
-                      <RefreshCw className={cn("w-4 h-4", iframeLoading && "animate-spin")} />
-                      Refresh
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedItem(null);
-                        fetchIntelligence(searchQuery); // Refresh to get better links
-                      }}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl md:rounded-2xl text-xs md:text-sm font-black uppercase italic tracking-tighter hover:bg-rose-500 transition-all"
-                    >
-                      <X className="w-4 h-4" />
-                      Report Broken
-                    </button>
-                    <a 
-                      href={selectedItem.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl md:rounded-2xl text-xs md:text-sm font-black uppercase italic tracking-tighter hover:bg-indigo-500 hover:text-white transition-all"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Open in {selectedItem.platform}
-                    </a>
-                  </div>
-                </div>
-                <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed max-w-3xl">{selectedItem.snippet}</p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <VideoPlayer 
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onReportBroken={() => {
+          setSelectedItem(null);
+          fetchIntelligence(searchQuery);
+        }}
+      />
 
       {/* Footer */}
       <footer className="pt-12 border-t border-slate-100 px-4 md:px-0">

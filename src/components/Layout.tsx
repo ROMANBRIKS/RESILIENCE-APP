@@ -3,6 +3,8 @@ import { LayoutDashboard, MessageSquare, Search, Users, HeartHandshake, Shopping
 import { User } from '../types';
 import { cn } from '../lib/utils';
 
+import { Footer } from './Footer';
+
 interface LayoutProps {
   user: User;
   onLogout: () => void;
@@ -111,6 +113,7 @@ export default function Layout({ user, onLogout }: LayoutProps) {
       <main className="flex-1 overflow-auto pb-24 md:pb-12 p-4 md:p-12">
         <div className="max-w-5xl mx-auto">
           <Outlet />
+          <Footer />
         </div>
       </main>
 

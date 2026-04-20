@@ -1,5 +1,5 @@
 {
-  "name": "Resilience",
-  "description": "A privacy-first, AI-powered financial support platform for working-class communities.",
+  "name": "Resilience: Financial Intelligence Hub",
+  "description": "The premier AI-powered financial resilience platform for USA, Europe, Canada, and Australia. Providing real-time economic intelligence, curated financial news, and personalized recovery strategies.",
   "requestFramePermissions": ["geolocation"]
 }
